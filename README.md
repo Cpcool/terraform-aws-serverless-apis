@@ -17,12 +17,13 @@ module "serverless-apis" {
   }
   environments = ["dev"]
 }
+```
 
-```
-```
+```python
 Folder structure
 
 ├── artifacts
 │   ├── getHealthCheckStatus
 │   │   └── index.js
 ├── main.tf
+```
