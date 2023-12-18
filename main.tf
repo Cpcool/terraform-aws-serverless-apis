@@ -15,6 +15,10 @@ data "aws_caller_identity" "identity" {}
   }
 }
 
+locals {
+  handler_functions = flatten([for endpoint in var.api_endpoints : values(endpoint)])
+}
+
 resource "aws_api_gateway_rest_api" "rest_api" {
   name = var.api_name
   endpoint_configuration {
@@ -28,12 +32,11 @@ resource "aws_api_gateway_rest_api" "rest_api" {
 
  module "lambda_function" {
   source                                  = "terraform-aws-modules/lambda/aws"
-  for_each                                = var.lambda_functions
+  for_each                                = toset(local.handler_functions)
   function_name                           = each.key
-  runtime                                 = each.value.runtime
-  handler                                 = each.value.handler
-  create_package                          = false
-  local_existing_package                  = "${path.root}/${each.value.zip}"
+  runtime                                 = "nodejs16.x"
+  handler                                 = "index.handler"
+  source_path                             = "${path.root}/src/artifacts/${each.key}/"
   create_current_version_allowed_triggers = false
   allowed_triggers = {
     api-gateway = {
@@ -49,6 +52,9 @@ resource "aws_api_gateway_deployment" "example" {
   triggers = {
     redeployment = sha1(jsonencode(aws_api_gateway_rest_api.rest_api.body))
   }
+   lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_api_gateway_stage" "example" {
@@ -57,3 +63,4 @@ resource "aws_api_gateway_stage" "example" {
   for_each =  toset(var.environments)
   stage_name    = each.value
 }
+
