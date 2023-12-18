@@ -7,14 +7,14 @@ variable "api_endpoints" {
   type        = map(map(string))
 }
 
-variable "lambda_functions" {
-  description = "Map of Lambda functions and their configurations."
-  type        = map(object({
-    runtime = string
-    handler = string
-    zip     = string
-  }))
-}
+# variable "lambda_functions" {
+#   description = "Map of Lambda functions and their configurations."
+#   type        = map(object({
+#     runtime = string
+#     handler = string
+#     zip     = string
+#   }))
+# }
 
 variable "environments" {
   description = "Name of environements"
